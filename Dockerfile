@@ -1,4 +1,7 @@
 FROM adoptopenjdk/openjdk11:alpine
+ARG ENIGMATICA_REPOSITORY=https://github.com/NillerMedDild/Enigmatica6.git
+ARG ENIGMATICA_COMMIT_ISH=0.4.14
+ENV EULA=FALSE
 
 # install the powershell
 RUN apk add --no-cache \
@@ -29,17 +32,16 @@ ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/powershell
 # clone e6
 RUN mkdir -p /opt/minecraft &&\
  cd /opt/minecraft &&\
- git clone https://github.com/NillerMedDild/Enigmatica6.git /opt/minecraft
+ git clone $ENIGMATICA_REPOSITORY /opt/minecraft
 WORKDIR /opt/minecraft
 
 # setup e6
-RUN git checkout 0.4.14 &&\
+RUN git checkout $ENIGMATICA_COMMIT_ISH &&\
     cd automation &&\
     dos2unix *.sh &&\
-    pwsh update-server.ps1 0.4.14 &&\
+    pwsh update-server.ps1 $ENIGMATICA_COMMIT_ISH &&\
     cd .. &&\
-    java -jar InstanceSync.jar &&\
-    echo 'eula=true'>eula.txt
+    java -jar InstanceSync.jar
 
 COPY docker-entrypoint.sh /opt/minecraft
 ENTRYPOINT ["/opt/minecraft/docker-entrypoint.sh"]
